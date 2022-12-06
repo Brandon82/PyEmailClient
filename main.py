@@ -23,8 +23,15 @@ def main():
     
     client = ClientManager()
     def auto_center_cb(s, d):
+
         win_width = dpg.get_item_width(login_screen) or dpg.get_item_width(email_screen)
         win_height = dpg.get_item_height(login_screen) or dpg.get_item_width(email_screen)
+
+        #check is login_screen is shown
+        if (win_width < 634 and dpg.does_item_exist(login_screen)):
+            dpg.hide_item(common_ports_group)
+        else:
+            dpg.show_item(common_ports_group)
 
         list_width = dpg.get_item_rect_size(item=email_list_group)[0]
         dpg.set_item_pos(item=email_list_group, pos=[(win_width/2)-(list_width/2), 80])
@@ -36,9 +43,6 @@ def main():
         dpg.set_item_pos(item=common_ports_group, pos=[10, helper_pos[1]])
 
         dpg.set_item_pos(item=login_status_group, pos=[16, win_height-58])
-        dpg.set_item_width(item=login_status_group, width=win_width-32)
-
-        #dpg.get_item_width(login_screen)-28
 
 
     def login_cb(s, d):
@@ -144,9 +148,12 @@ def main():
 
                 email_list = dpg.add_listbox(label='', items=mail_list, width=300, callback=selected_email_cb, num_items=4)
                 
-                with dpg.group(horizontal=True, horizontal_spacing=2):
+                with dpg.group(horizontal=True, horizontal_spacing=4) as server_input_group:
                     server_input = dpg.add_input_text(default_value='', callback=server_input_cb, width=235, multiline=False, show=False, hint='Enter server')
                     port_input = dpg.add_input_text(default_value='', callback=port_input_cb, width=60, multiline=False, show=False, hint='Port')
+                
+                #set the styling of the server_input_group
+
             
             with dpg.group(pos=[100, 100]) as common_ports_group:
                 dpg.add_text('Common SMTP ports:')
@@ -161,7 +168,7 @@ def main():
             dpg.add_button(label='Login', width=272, callback=login_cb)
 
 
-        with dpg.child_window(width=dpg.get_item_width(login_screen)-32, height=40, show=False) as login_status_group:
+        with dpg.child_window(width=-1, height=40, show=False) as login_status_group:
             with dpg.group(horizontal=True):
                 login_text = dpg.add_text(label='Login Successful', show=False)
                 login_error = dpg.add_text(label='Error', show=False)
@@ -193,12 +200,29 @@ def main():
         with dpg.group(show=False) as remail_group:
             dpg.add_text('Emails:')
             dpg.add_button(label='Fetch Inbox', width = 160, height = 30, callback=parse_inbox_cb)
+        
+    with dpg.theme() as login_screen_theme:
+        with dpg.theme_component(dpg.mvListbox):
+            dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
+
+        with dpg.theme_component(dpg.mvInputText):
+            dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
+
+        with dpg.theme_component(dpg.mvInputInt):
+            dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
+
+
+
 
     #show_demo()
     #dpg.show_style_editor()
 
+    # Main/Default theme
     apply_main_theme()
-    dpg.create_viewport(title=config['app_title'], width=config['win_width'] + 16, height=config['win_height'] + 38)
+    # For custom theming on each page
+    dpg.bind_item_theme(login_screen, login_screen_theme)
+
+    dpg.create_viewport(title=config['app_title'], width=config['win_width'] + 16, height=config['win_height'] + 38, min_height=600, min_width=340)
     dpg.setup_dearpygui()
     dpg.show_viewport()
     dpg.set_primary_window(login_screen, True)
