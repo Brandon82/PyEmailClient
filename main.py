@@ -9,6 +9,7 @@ from helpers import *
 from network import *
 from globals import *
 from tabmanager import *
+from fontmanager import *
 from enum import Enum, auto
 
 
@@ -151,9 +152,7 @@ def main():
     with dpg.window(width=config['win_width'], height=config['win_height'], no_resize=True, no_move=True, no_title_bar=True, show=False) as email_screen:
         dpg.bind_font(f.b2_sb)
 
-        tab = TabBarManager(num=2, list=['View Mail', 'Read Mail'])
-
-        with dpg.group() as email_group:   
+        with dpg.group(tag='email_group') as email_group:   
             dpg.add_spacer(height=2)
             user_email_text = dpg.add_text('My Email: ')
             dpg.add_spacer(height=2)
@@ -167,10 +166,14 @@ def main():
                 dpg.add_button(label='Send Email', width = 160, height = 30, callback = send_message_cb)
                 dpg.add_button(label='Delete Email', width = 160, height = 30, callback = delete_message_cb)
 
-        with dpg.group(show=False) as remail_group:
+        with dpg.group(show=False, tag='read_group') as read_group:
             dpg.add_text('Emails:')
             dpg.add_button(label='Fetch Inbox', width = 160, height = 30, callback=parse_inbox_cb)
-        
+
+        tab = TabBarManager(num=2, list=['View Mail', 'Read Mail'], item_list=[email_group, read_group])
+
+
+
     with dpg.theme() as login_page_theme:
         with dpg.theme_component(dpg.mvListbox):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)

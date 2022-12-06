@@ -2,9 +2,6 @@ import dearpygui.dearpygui as dpg
 from sys import platform
 import os
 
-def get_platform():
-    return platform
-
 def get_file_path():
     return os.path.dirname(os.path.realpath(__file__))
 
@@ -30,23 +27,3 @@ class ClientManager:
     selected_server = 'smtp.gmail.com'
     port = 465
     current_message=''''''
-
-class FontManager:
-    def __init__(self, file_path: str):
-        self.file_path: str = file_path
-        with dpg.font_registry():
-            if platform == 'darwin':
-                self.h1_b = dpg.add_font((self.file_path) + '/Fonts/OpenSans-Bold.ttf', 34)
-                self.h2_b = dpg.add_font((self.file_path) + '/Fonts/OpenSans-Bold.ttf', 22)
-
-                self.b2 = dpg.add_font((self.file_path) + '/Fonts/OpenSans-Regular.ttf', 22)
-                self.b2_sb = dpg.add_font((self.file_path) + '/Fonts/OpenSans-Regular.ttf', 22)
-
-            elif platform == 'win32':
-                self.h1_b = dpg.add_font((self.file_path) + '\Fonts\OpenSans-Bold.ttf', 34)
-                self.h2_b = dpg.add_font((self.file_path) + '\Fonts\OpenSans-Bold.ttf', 22)
-
-                self.b2 = dpg.add_font((self.file_path) + '\Fonts\OpenSans-Regular.ttf', 22)
-                self.b2_sb = dpg.add_font((self.file_path) + '\Fonts\OpenSans-SemiBold.ttf', 22)
-
-
