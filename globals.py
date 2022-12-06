@@ -1,5 +1,4 @@
 import dearpygui.dearpygui as dpg
-import os
 from helpers import *
 
 config = {
@@ -11,5 +10,3 @@ config = {
 client = ClientManager()
 
 MAIL_LIST = ['smtp.gmail.com', 'smtp.mail.yahoo.com', 'other']
-
-CUR_FILE_PATH = os.path.dirname(os.path.realpath(__file__))

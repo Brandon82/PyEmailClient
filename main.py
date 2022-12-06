@@ -66,7 +66,7 @@ def main():
             leave_login_screen()
 
     def selected_email_cb(s, d):
-        client.selected_server = dpg.get_value(s)
+        client.selected_server = dpg.get_item_user_data(s)
         if client.selected_server == MAIL_LIST[-1]:
             dpg.show_item(server_input)
             dpg.show_item(port_input)
@@ -98,36 +98,20 @@ def main():
     def recip_email_cb(s, d):
         client.recipient = dpg.get_value(s)
     
-    def tabbar_cb(s, d):
-        print(s)
-        if s == 45:
-            dpg.hide_item(remail_group)
-            dpg.show_item(email_group)
-        elif s == 46:
-            dpg.hide_item(email_group)
-            dpg.show_item(remail_group)
-    
     def parse_inbox_cb(s, d):
         imap = IMAPHelper(client.email, client.pw)
         imap.fetch_inbox()
 
     dpg.create_context()
 
-    with dpg.font_registry():
-        if platform == 'darwin':
-            title_font1 = dpg.add_font(CUR_FILE_PATH + '/Fonts/OpenSans-Bold.ttf', 34)
-            title_font2 = dpg.add_font(CUR_FILE_PATH + '/Fonts/OpenSans-Bold.ttf', 22)
-
-        elif platform == 'win32':
-            title_font1 = dpg.add_font(CUR_FILE_PATH + '\Fonts\OpenSans-Bold.ttf', 34)
-            title_font2 = dpg.add_font(CUR_FILE_PATH + '\Fonts\OpenSans-Bold.ttf', 22)
+    f = FontManager(client)
 
     with dpg.window(width=config['win_width'], height=config['win_height'], no_title_bar=True, no_resize=True, no_move=True) as login_screen:
-        dpg.bind_font(title_font2)
+        dpg.bind_font(f.b2_sb)
 
         with dpg.group() as landing_group:
             title_text = dpg.add_text(f"Python {config['app_title']}")
-            dpg.bind_item_font(title_text, title_font1)
+            dpg.bind_item_font(title_text, f.h1_b)
             dpg.add_spacer()
             dpg.add_spacer()
 
@@ -163,23 +147,25 @@ def main():
         
 
     with dpg.window(width=config['win_width'], height=config['win_height'], no_resize=True, no_move=True, no_title_bar=True, show=False) as email_screen:
-        dpg.bind_font(title_font2)
+        dpg.bind_font(f.b2_sb)
 
-        with dpg.group(horizontal=True) as email_title:
-            email_title_text = dpg.add_button(label='Send Mail', width = 160, height = 30, callback = tabbar_cb)
-            #dpg.bind_item_font(email_title_text, title_font1)
-            email_title_text2 = dpg.add_button(label='View Mail', width = 160, height = 30, callback = tabbar_cb)
-            #dpg.bind_item_font(email_title_text2, title_font1)
+        tab = TabBarManager(num=2, list=['View Mail', 'Send Mail'])
+
+       # with dpg.group(horizontal=True) as email_title:
+           # email_title_text = dpg.add_button(label='Send Mail', width = 160, height = 30, callback = tabbar_cb)
+            #dpg.bind_item_font(email_title_text, f.h1_b)
+          #  email_title_text2 = dpg.add_button(label='View Mail', width = 160, height = 30, callback = tabbar_cb)
+            #dpg.bind_item_font(email_title_text2, f.h1_b)
 
         with dpg.group() as email_group:   
             dpg.add_spacer(height=2)
             user_email_text = dpg.add_text('My Email: ')
             dpg.add_spacer(height=2)
 
-            recip_email_input = dpg.add_input_text(default_value='', multiline=False, hint='Enter recipitent Email', callback = recip_email_cb)
+            recip_email_input = dpg.add_input_text(default_value='', multiline=False, hint='Enter recipitent Email', callback = recip_email_cb, width=300)
 
             email_title_text = dpg.add_text('Enter your message:')
-            note_input = dpg.add_input_text(tag='note_inp', default_value='', callback=email_note_cb, multiline=True, height=200)
+            note_input = dpg.add_input_text(tag='note_inp', default_value='', callback=email_note_cb, multiline=True, height=-100, width=-1)
 
             with dpg.group(horizontal=True) as send_email_group:
                 dpg.add_button(label='Send Email', width = 160, height = 30, callback = send_message_cb)
