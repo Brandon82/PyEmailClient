@@ -1,7 +1,6 @@
 import smtplib, ssl
 import dearpygui.dearpygui as dpg
 import imaplib, email
-from imap_tools import MailBox, AND
 
 class SMTPHelper:
     def __init__(self, email, password, smtp_server='smtp.gmail.com', port=465):

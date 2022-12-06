@@ -1,7 +1,5 @@
 import dearpygui.dearpygui as dpg
-from colors import *
 from helpers import *
-
 
 
 main_background_color = (40, 40, 40)

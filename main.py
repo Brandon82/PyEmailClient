@@ -8,7 +8,9 @@ from themes import *
 from helpers import *
 from network import *
 from globals import *
+from tabmanager import *
 from enum import Enum, auto
+
 
 def main():
     
@@ -104,7 +106,7 @@ def main():
 
     dpg.create_context()
 
-    f = FontManager(client)
+    f = FontManager(get_file_path())
 
     with dpg.window(width=config['win_width'], height=config['win_height'], no_title_bar=True, no_resize=True, no_move=True) as login_screen:
         dpg.bind_font(f.b2_sb)
@@ -149,13 +151,7 @@ def main():
     with dpg.window(width=config['win_width'], height=config['win_height'], no_resize=True, no_move=True, no_title_bar=True, show=False) as email_screen:
         dpg.bind_font(f.b2_sb)
 
-        tab = TabBarManager(num=2, list=['View Mail', 'Send Mail'])
-
-       # with dpg.group(horizontal=True) as email_title:
-           # email_title_text = dpg.add_button(label='Send Mail', width = 160, height = 30, callback = tabbar_cb)
-            #dpg.bind_item_font(email_title_text, f.h1_b)
-          #  email_title_text2 = dpg.add_button(label='View Mail', width = 160, height = 30, callback = tabbar_cb)
-            #dpg.bind_item_font(email_title_text2, f.h1_b)
+        tab = TabBarManager(num=2, list=['View Mail', 'Read Mail'])
 
         with dpg.group() as email_group:   
             dpg.add_spacer(height=2)
