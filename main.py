@@ -34,7 +34,7 @@ def main():
         helper_pos = dpg.get_item_pos(item=email_list_group)
         dpg.set_item_pos(item=common_ports_group, pos=[10, helper_pos[1]])
 
-        dpg.set_item_pos(item=login_status_group, pos=[16, win_height-58])
+        dpg.set_item_pos(item=login_status_group, pos=[16, win_height-80])
 
     def leave_login_screen():
         dpg.hide_item(login_screen)
@@ -156,9 +156,6 @@ def main():
 
             dpg.add_button(label='Login', width=232, pos=[(dpg.get_item_width(login_group)-232)/2, dpg.get_item_height(login_group)-48], callback=login_cb)
 
-
-
-
         with dpg.group(horizontal=True, show=False) as login_status_group:
             login_text = dpg.add_text(label='Login Successful', show=False)
             login_error = dpg.add_text(label='Error', show=False)
@@ -189,6 +186,11 @@ def main():
 
 
     with dpg.theme() as email_list_group_theme:
+        with dpg.theme_component(dpg.mvAll):
+            dpg.add_theme_color(dpg.mvThemeCol_FrameBgActive, dark_accent_color)
+            dpg.add_theme_color(dpg.mvThemeCol_HeaderHovered, dark_accent_color)
+            dpg.add_theme_color(dpg.mvThemeCol_HeaderActive, dark_accent_color)
+
         with dpg.theme_component(dpg.mvListbox):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
 
@@ -210,7 +212,7 @@ def main():
 
 
     #show_demo()
-    #dpg.show_style_editor()
+    dpg.show_style_editor()
 
     # Main/Default theme
     apply_main_theme()

@@ -6,6 +6,7 @@ main_background_color = (40, 40, 40)
 child_background_color = (30, 30, 30)
 text_color = (255, 255, 255, 255)
 accent_color = (104, 104, 204)
+dark_accent_color = (104, 104, 204, 150)
 
 
 def apply_main_theme():
@@ -36,8 +37,6 @@ def apply_main_theme():
             dpg.add_theme_color(dpg.mvThemeCol_HeaderHovered, accent_color)
             dpg.add_theme_color(dpg.mvThemeCol_HeaderActive, accent_color)
             
-
-
 
 
             # Best way to completely disable borders:
