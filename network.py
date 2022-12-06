@@ -1,21 +1,7 @@
 import smtplib, ssl
-import os
 import dearpygui.dearpygui as dpg
 import imaplib, email
 from imap_tools import MailBox, AND
-
-
-class ClientManager:
-    CUR_FILE_PATH = os.path.dirname(os.path.realpath(__file__))
-    email = ''
-    pw = ''
-    recipient = ''
-    selected_server = 'smtp.gmail.com'
-    port = 465
-    mode = 1
-    is_logged_in=False
-    current_message=''''''
-
 
 class SMTPHelper:
     def __init__(self, email, password, smtp_server='smtp.gmail.com', port=465):

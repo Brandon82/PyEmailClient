@@ -1,7 +1,7 @@
 import dearpygui.dearpygui as dpg
+from sys import platform
 
 class LayoutHelper:
-
     def __init__(self):
         self.table_id = dpg.add_table(header_row=False, policy=dpg.mvTable_SizingStretchProp)
         self.stage_id = dpg.add_stage()
@@ -16,4 +16,11 @@ class LayoutHelper:
         with dpg.table_row(parent=self.table_id):
             dpg.unstage(self.stage_id)
 
-
+class ClientManager:
+    email = ''
+    pw = ''
+    recipient = ''
+    selected_server = 'smtp.gmail.com'
+    port = 465
+    current_message=''''''
+    platform = platform

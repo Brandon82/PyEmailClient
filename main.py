@@ -5,25 +5,14 @@ import time
 from dearpygui.demo import show_demo
 from threading import Timer
 from themes import *
-from sys import platform
 from helpers import *
 from network import *
+from globals import *
 from enum import Enum, auto
-import smtplib, ssl
-
-config = {
-    'app_title': 'Email Client',
-    'win_width': 750,
-    'win_height': 560,
-}
-
-mail_list = ['smtp.gmail.com', 'smtp.mail.yahoo.com', 'other']
 
 def main():
     
-    client = ClientManager()
     def auto_center_cb(s, d):
-
         win_width = dpg.get_item_width(login_screen) or dpg.get_item_width(email_screen)
         win_height = dpg.get_item_height(login_screen) or dpg.get_item_width(email_screen)
 
@@ -44,15 +33,14 @@ def main():
 
         dpg.set_item_pos(item=login_status_group, pos=[16, win_height-58])
 
+    def leave_login_screen():
+        dpg.hide_item(login_screen)
+        dpg.show_item(email_screen)
+        dpg.set_primary_window(email_screen, True)
 
     def login_cb(s, d):
         client.email = dpg.get_value(email_input)
         client.pw = dpg.get_value(pw_input)
-
-        def leave_login_screen():
-            dpg.hide_item(login_screen)
-            dpg.show_item(email_screen)
-            dpg.set_primary_window(email_screen, True)
 
         mail = SMTPHelper(email=client.email, password=client.pw, smtp_server=client.selected_server)
 
@@ -79,7 +67,7 @@ def main():
 
     def selected_email_cb(s, d):
         client.selected_server = dpg.get_value(s)
-        if client.selected_server == mail_list[-1]:
+        if client.selected_server == MAIL_LIST[-1]:
             dpg.show_item(server_input)
             dpg.show_item(port_input)
         else:
@@ -127,12 +115,12 @@ def main():
 
     with dpg.font_registry():
         if platform == 'darwin':
-            title_font1 = dpg.add_font(client.CUR_FILE_PATH + '/Fonts/OpenSans-Bold.ttf', 34)
-            title_font2 = dpg.add_font(client.CUR_FILE_PATH + '/Fonts/OpenSans-Bold.ttf', 22)
+            title_font1 = dpg.add_font(CUR_FILE_PATH + '/Fonts/OpenSans-Bold.ttf', 34)
+            title_font2 = dpg.add_font(CUR_FILE_PATH + '/Fonts/OpenSans-Bold.ttf', 22)
 
         elif platform == 'win32':
-            title_font1 = dpg.add_font(client.CUR_FILE_PATH + '\Fonts\OpenSans-Bold.ttf', 34)
-            title_font2 = dpg.add_font(client.CUR_FILE_PATH + '\Fonts\OpenSans-Bold.ttf', 22)
+            title_font1 = dpg.add_font(CUR_FILE_PATH + '\Fonts\OpenSans-Bold.ttf', 34)
+            title_font2 = dpg.add_font(CUR_FILE_PATH + '\Fonts\OpenSans-Bold.ttf', 22)
 
     with dpg.window(width=config['win_width'], height=config['win_height'], no_title_bar=True, no_resize=True, no_move=True) as login_screen:
         dpg.bind_font(title_font2)
@@ -146,7 +134,7 @@ def main():
             with dpg.group() as email_list_group:
                 dpg.add_text('Select the SMTP email server:')
 
-                email_list = dpg.add_listbox(label='', items=mail_list, width=300, callback=selected_email_cb, num_items=4)
+                email_list = dpg.add_listbox(label='', items=MAIL_LIST, width=300, callback=selected_email_cb, num_items=4)
                 
                 with dpg.group(horizontal=True, horizontal_spacing=4) as server_input_group:
                     server_input = dpg.add_input_text(default_value='', callback=server_input_cb, width=235, multiline=False, show=False, hint='Enter server')
@@ -201,7 +189,7 @@ def main():
             dpg.add_text('Emails:')
             dpg.add_button(label='Fetch Inbox', width = 160, height = 30, callback=parse_inbox_cb)
         
-    with dpg.theme() as login_screen_theme:
+    with dpg.theme() as child_bg_col_on_listbox_and_input:
         with dpg.theme_component(dpg.mvListbox):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
 
@@ -212,15 +200,13 @@ def main():
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
 
 
-
-
     #show_demo()
     #dpg.show_style_editor()
 
     # Main/Default theme
     apply_main_theme()
     # For custom theming on each page
-    dpg.bind_item_theme(login_screen, login_screen_theme)
+    dpg.bind_item_theme(email_list_group, child_bg_col_on_listbox_and_input)
 
     dpg.create_viewport(title=config['app_title'], width=config['win_width'] + 16, height=config['win_height'] + 38, min_height=600, min_width=340)
     dpg.setup_dearpygui()
@@ -232,7 +218,6 @@ def main():
 
     dpg.start_dearpygui()
     dpg.destroy_context()
-
 
 if __name__ == "__main__":
     main()
