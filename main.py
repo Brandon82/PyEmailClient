@@ -205,7 +205,7 @@ def main():
 
 
     #show_demo()
-    #dpg.show_style_editor()
+    dpg.show_style_editor()
 
     # Main/Default theme
     apply_main_theme()
