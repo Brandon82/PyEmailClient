@@ -35,6 +35,10 @@ def main():
         helper_pos = dpg.get_item_pos(item=email_list_group)
         dpg.set_item_pos(item=common_ports_group, pos=[10, helper_pos[1]])
 
+        dpg.set_item_pos(item=login_status_group, pos=[16, win_height-58])
+        dpg.set_item_width(item=login_status_group, width=win_width-32)
+
+        #dpg.get_item_width(login_screen)-28
 
 
     def login_cb(s, d):
@@ -55,16 +59,17 @@ def main():
             dpg.configure_item(login_text, color=(95, 255, 95))
             dpg.show_item(login_text)
             dpg.hide_item(login_error)
-
+            dpg.show_item(login_status_group)
             dpg.set_value(user_email_text, str(client.email))
             time.sleep(2)
             leave_login_screen()
         else:
-            dpg.set_value(login_text, 'Login Failed')
+            dpg.set_value(login_text, 'Login Failed:')
             dpg.configure_item(login_text, color=(255, 50, 50))
             dpg.set_value(login_error, str(login_status))     
             dpg.show_item(login_text)
             dpg.show_item(login_error)   
+            dpg.show_item(login_status_group)
             time.sleep(2)
             leave_login_screen()
 
@@ -138,10 +143,15 @@ def main():
                 dpg.add_text('Select the SMTP email server:')
 
                 email_list = dpg.add_listbox(label='', items=mail_list, width=300, callback=selected_email_cb, num_items=4)
-
-                server_input = dpg.add_input_text(default_value='', callback=server_input_cb, width=235, multiline=False, show=False, hint='Enter server')
-                dpg.add_same_line()
-                port_input = dpg.add_input_text(default_value='', callback=port_input_cb, width=60, multiline=False, show=False, hint='Port')
+                
+                with dpg.group(horizontal=True, horizontal_spacing=2):
+                    server_input = dpg.add_input_text(default_value='', callback=server_input_cb, width=235, multiline=False, show=False, hint='Enter server')
+                    port_input = dpg.add_input_text(default_value='', callback=port_input_cb, width=60, multiline=False, show=False, hint='Port')
+            
+            with dpg.group(pos=[100, 100]) as common_ports_group:
+                dpg.add_text('Common SMTP ports:')
+                t1 = dpg.add_text('TLS: 587')
+                dpg.add_text('SSL: 465')
 
         with dpg.child_window(width=300, height=190) as login_group:
             dpg.add_text('Email Address:')
@@ -150,14 +160,12 @@ def main():
             pw_input = dpg.add_input_text(default_value='', width=272, multiline=False, password=True)
             dpg.add_button(label='Login', width=272, callback=login_cb)
 
-            login_text = dpg.add_text(label='Login Successful', show=False)
-            login_error = dpg.add_text(label='Error', show=False)
-        
-        with dpg.group(pos=[100, 100]) as common_ports_group:
-            dpg.add_text('Common SMTP ports:')
-            t1 = dpg.add_text('TLS: 587')
-            dpg.add_text('SSL: 465')
 
+        with dpg.child_window(width=dpg.get_item_width(login_screen)-32, height=40, show=False) as login_status_group:
+            with dpg.group(horizontal=True):
+                login_text = dpg.add_text(label='Login Successful', show=False)
+                login_error = dpg.add_text(label='Error', show=False)
+        
 
     with dpg.window(width=config['win_width'], height=config['win_height'], no_resize=True, no_move=True, no_title_bar=True, show=False) as email_screen:
         dpg.bind_font(title_font2)
@@ -196,6 +204,7 @@ def main():
     dpg.set_primary_window(login_screen, True)
 
     dpg.set_viewport_resize_callback(auto_center_cb)
+    auto_center_cb(None, None)
 
     dpg.start_dearpygui()
     dpg.destroy_context()
