@@ -42,15 +42,15 @@ def main():
         dpg.set_primary_window(email_screen, True)
 
     def login_cb(s, d):
-        client.email = dpg.get_value(email_input)
-        client.pw = dpg.get_value(pw_input)
+        client.email = dpg.get_value('email_input')
+        client.pw = dpg.get_value('pw_input')
 
         mail = SMTPHelper(email=client.email, password=client.pw, smtp_server=client.selected_server)
 
-        login_status = mail.login()
-        #login_status = 1
+        #login_status = mail.login()
+        login_status = 1
         if login_status == 1:
-            dpg.set_value(login_text, 'Login Success')
+            dpg.set_value(login_text, 'Login Successful')
             dpg.configure_item(login_text, color=(95, 255, 95))
             dpg.show_item(login_text)
             dpg.hide_item(login_error)
@@ -135,18 +135,33 @@ def main():
                 t1 = dpg.add_text('TLS: 587')
                 dpg.add_text('SSL: 465')
 
-        with dpg.child_window(width=300, height=190) as login_group:
-            dpg.add_text('Email Address:')
-            email_input = dpg.add_input_text(default_value='', width=272, multiline=False)
-            dpg.add_text('Password:')
-            pw_input = dpg.add_input_text(default_value='', width=272, multiline=False, password=True)
-            dpg.add_button(label='Login', width=272, callback=login_cb)
+        with dpg.child_window(width=300, height=210) as login_group:
+            
+            dpg.add_spacer(height=4)
+            dpg.add_text('Email Address:', indent=20)
+
+            line1 = LayoutHelper()
+            line1. add_widget(dpg.add_spacer(), .05)
+            line1.add_widget(dpg.add_input_text(default_value='', tag='email_input', width=232, multiline=False), .90)
+            line1.add_widget(dpg.add_spacer(), .05)
+            line1.submit()
 
 
-        with dpg.child_window(width=-1, height=40, show=False) as login_status_group:
-            with dpg.group(horizontal=True):
-                login_text = dpg.add_text(label='Login Successful', show=False)
-                login_error = dpg.add_text(label='Error', show=False)
+            dpg.add_text('Password:', indent=20)
+            line2 = LayoutHelper()
+            line2. add_widget(dpg.add_spacer(), .05)
+            line2.add_widget(dpg.add_input_text(default_value='', tag='pw_input', width=232, multiline=False, password=True), .90)
+            line2.add_widget(dpg.add_spacer(), .05)
+            line2.submit()
+
+            dpg.add_button(label='Login', width=232, pos=[(dpg.get_item_width(login_group)-232)/2, dpg.get_item_height(login_group)-48], callback=login_cb)
+
+
+
+
+        with dpg.group(horizontal=True, show=False) as login_status_group:
+            login_text = dpg.add_text(label='Login Successful', show=False)
+            login_error = dpg.add_text(label='Error', show=False)
         
 
     with dpg.window(width=config['win_width'], height=config['win_height'], no_resize=True, no_move=True, no_title_bar=True, show=False) as email_screen:
@@ -173,8 +188,7 @@ def main():
         tab = TabBarManager(num=2, list=['View Mail', 'Read Mail'], item_list=[email_group, read_group])
 
 
-
-    with dpg.theme() as login_page_theme:
+    with dpg.theme() as email_list_group_theme:
         with dpg.theme_component(dpg.mvListbox):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
 
@@ -183,6 +197,12 @@ def main():
 
         with dpg.theme_component(dpg.mvInputInt):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
+
+    
+    with dpg.theme() as login_group_theme:
+        with dpg.theme_component(dpg.mvAll):
+            dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 0)  
+
     
     with dpg.theme() as send_page_theme:
         with dpg.theme_component(dpg.mvAll):
@@ -190,12 +210,14 @@ def main():
 
 
     #show_demo()
-    dpg.show_style_editor()
+    #dpg.show_style_editor()
 
     # Main/Default theme
     apply_main_theme()
-    # For custom theming on each page
-    dpg.bind_item_theme(email_list_group, login_page_theme)
+
+    # For custom theming on each page/element
+    dpg.bind_item_theme(email_list_group, email_list_group_theme)
+    dpg.bind_item_theme(login_group, login_group_theme)
     dpg.bind_item_theme(email_screen, send_page_theme)
 
 
