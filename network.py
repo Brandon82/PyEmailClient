@@ -45,7 +45,6 @@ class IMAPHelper:
     def fetch_inbox(self):
         x = self.connection.select('inbox', readonly=True)
         num = x[1][0].decode('utf-8')
-
         
         resp, lst = self.connection.fetch(num, '(RFC822)')
         body = lst[0][1]

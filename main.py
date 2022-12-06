@@ -189,7 +189,7 @@ def main():
             dpg.add_text('Emails:')
             dpg.add_button(label='Fetch Inbox', width = 160, height = 30, callback=parse_inbox_cb)
         
-    with dpg.theme() as child_bg_col_on_listbox_and_input:
+    with dpg.theme() as login_page_theme:
         with dpg.theme_component(dpg.mvListbox):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
 
@@ -198,6 +198,10 @@ def main():
 
         with dpg.theme_component(dpg.mvInputInt):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
+    
+    with dpg.theme() as send_page_theme:
+        with dpg.theme_component(dpg.mvAll):
+            dpg.add_theme_color(dpg.mvThemeCol_WindowBg, child_background_color, category=dpg.mvThemeCat_Core)
 
 
     #show_demo()
@@ -206,7 +210,9 @@ def main():
     # Main/Default theme
     apply_main_theme()
     # For custom theming on each page
-    dpg.bind_item_theme(email_list_group, child_bg_col_on_listbox_and_input)
+    dpg.bind_item_theme(email_list_group, login_page_theme)
+    dpg.bind_item_theme(email_screen, send_page_theme)
+
 
     dpg.create_viewport(title=config['app_title'], width=config['win_width'] + 16, height=config['win_height'] + 38, min_height=600, min_width=340)
     dpg.setup_dearpygui()
