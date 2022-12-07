@@ -1,6 +1,8 @@
 import dearpygui.dearpygui as dpg
 from sys import platform
 import os
+from dataclasses import dataclass
+
 
 def get_file_path():
     return os.path.dirname(os.path.realpath(__file__))
@@ -20,10 +22,17 @@ class LayoutHelper:
         with dpg.table_row(parent=self.table_id):
             dpg.unstage(self.stage_id)  
 
+@dataclass
 class ClientManager:
-    email = ''
-    pw = ''
-    recipient = ''
-    selected_server = 'smtp.gmail.com'
-    port = 465
-    current_message=''''''
+    email: str = ''
+    pw: str = ''
+    recipient: str = ''
+    selected_server: str = 'smtp.gmail.com'
+    port: int = 465
+    current_message: str = ''''''
+
+@dataclass
+class Config:
+    app_title: str
+    win_width: int
+    win_height: int
