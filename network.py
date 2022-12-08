@@ -1,57 +1,63 @@
 import smtplib, ssl
 import dearpygui.dearpygui as dpg
 import imaplib, email
+import datetime
+from data import *
+from imap_tools import MailBox, A
+from datetime import date
+
+
 
 class SMTPHelper:
-    def __init__(self, email, password, smtp_server='smtp.gmail.com', port=465):
+    def __init__(self, user, pw, smtp_server='smtp.gmail.com', port=465):
         self.smtp_server = smtp_server
         self.port = port    #SSL=465, TLS=587
-        self.email = email
-        self.password = password
-        self.server = None
-        self.set_server()
+        self.user = user
+        self.pw = pw
+        self.server = smtplib.SMTP_SSL(self.smtp_server, self.port)
+        self.logged_in = False
 
-    def set_server(self):
-        context = ssl.create_default_context()
-        self.server = smtplib.SMTP_SSL(self.smtp_server, self.port, context=context)
-    
     def login(self):
         try:
-            self.server.login(self.email, self.password)
+            self.server.login(self.user, self.pw)
+            self.logged_in = True
             return 1
         except Exception as e:
             return str(e)
-        
-    def send_mail(self, recipient, message: str):
-        context = ssl.create_default_context()
-        self.server.login(self.email, self.password)
-        self.server.sendmail(self.email, recipient, message)
+
+    def send_mail(self, recipient, subject, message: str):
+        if not self.logged_in:
+            self.login()
+
+        message = "Subject: {}\n\n{}".format(subject, message)
+        self.server.sendmail(self.user, recipient, message)
 
 
 class IMAPHelper:
-    def __init__(self, email, password, imap_server='imap.gmail.com'):
+    def __init__(self, user, password, imap_server='imap.gmail.com'):
         self.imap_server = imap_server
-        self.email = email
-        self.password = password
-        self.connection = None
-        self.is_logged_in = False
-        self.set_connection()
+        self.user = user
+        self.pw = password
+        self.mail = imaplib.IMAP4_SSL(self.imap_server)
+        self.email_list = EmailList()
 
-    def set_connection(self):
-        self.connection = imaplib.IMAP4_SSL(self.imap_server)
-        self.connection.login(self.email, self.password)
+    def fetch_inbox2(self):
+        with MailBox(self.imap_server).login(self.user, self.pw, 'INBOX') as mailbox:
+            # Calculate the date range for the last 24 hours
+            now = datetime.datetime.now()
+            date_lte = now.strftime('%d-%b-%Y')
+            date_gte = (now - datetime.timedelta(hours=24)).strftime('%d-%b-%Y')
+            for msg in mailbox.fetch(A(date_gte=date_gte, date_lte=date_lte)):
+                email = Email(sender=msg.from_, subject=msg.subject, body=msg.text or msg.html, date=msg.date_str)
+                self.email_list.add(email)
+        return self.email_list
+
 
     def fetch_inbox(self):
-        x = self.connection.select('inbox', readonly=True)
-        num = x[1][0].decode('utf-8')
+        with MailBox(self.imap_server).login(self.user, self.pw, 'INBOX') as mailbox:
+            cur_date = date.today()  
+            for msg in mailbox.fetch(A(date_gte=datetime.date(cur_date.year, cur_date.month, cur_date.day))):
+                email = Email(sender=msg.from_, subject=msg.subject, body=msg.text or msg.html, date=msg.date_str)
+                self.email_list.add(email)
+        return self.email_list
         
-        resp, lst = self.connection.fetch(num, '(RFC822)')
-        body = lst[0][1]
-        email_message = email.message_from_bytes(body)
-        #print(email_message)
-        print('From:' + email_message['From'])
-        print('To:' + email_message['To'])
-        print('Date:' + email_message['Date'])
-        print('Subject:' + str(email_message['Subject']))
-        print('Content:' + str(email_message.get_payload()[0]))
-        print('------------------')

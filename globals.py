@@ -1,5 +1,5 @@
 import dearpygui.dearpygui as dpg
-from helpers import *
+from data import *
 
 config = {
     'app_title': 'Email Client',

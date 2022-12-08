@@ -2,6 +2,7 @@ import dearpygui.dearpygui as dpg
 from sys import platform
 import os
 from dataclasses import dataclass
+from data import *
 
 
 def get_file_path():
@@ -21,18 +22,3 @@ class LayoutHelper:
         dpg.pop_container_stack() # pop stage
         with dpg.table_row(parent=self.table_id):
             dpg.unstage(self.stage_id)  
-
-@dataclass
-class ClientManager:
-    email: str = ''
-    pw: str = ''
-    recipient: str = ''
-    selected_server: str = 'smtp.gmail.com'
-    port: int = 465
-    current_message: str = ''''''
-
-@dataclass
-class Config:
-    app_title: str
-    win_width: int
-    win_height: int

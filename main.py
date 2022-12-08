@@ -10,14 +10,14 @@ from network import *
 from globals import *
 from tabmanager import *
 from fontmanager import *
+from data import *
 from enum import Enum, auto
 
 
 def main():
-    
     def auto_center_cb(s, d):
-        win_width = dpg.get_item_width(login_screen) or dpg.get_item_width(email_screen)
-        win_height = dpg.get_item_height(login_screen) or dpg.get_item_width(email_screen)
+        win_width = dpg.get_item_width(login_screen)
+        win_height = dpg.get_item_height(login_screen)
 
         #check is login_screen is shown
         if (win_width < 634 and dpg.does_item_exist(login_screen)):
@@ -36,6 +36,10 @@ def main():
 
         dpg.set_item_pos(item=login_status_group, pos=[16, win_height-80])
 
+
+        dpg.set_item_pos(item=tab.tab_bar, pos=[dpg.get_item_width(email_screen)-220, 92])
+
+
     def leave_login_screen():
         dpg.hide_item(login_screen)
         dpg.show_item(email_screen)
@@ -45,10 +49,10 @@ def main():
         client.email = dpg.get_value('email_input')
         client.pw = dpg.get_value('pw_input')
 
-        mail = SMTPHelper(email=client.email, password=client.pw, smtp_server=client.selected_server)
+        mail = SMTPHelper(user=client.email, pw=client.pw, smtp_server=client.selected_server)
 
-        #login_status = mail.login()
-        login_status = 1
+        login_status = mail.login()
+        #login_status = 1
         if login_status == 1:
             dpg.set_value(login_text, 'Login Successful')
             dpg.configure_item(login_text, color=(95, 255, 95))
@@ -86,10 +90,13 @@ def main():
     def port_input_cb(s, d):
         client.port = dpg.get_value(s)
     
+    def subj_inp_cb(s, d):
+        client.current_subject = dpg.get_value(s)
+
     def send_message_cb(s, d):
         if client.current_message != '''''':
-            mail = SMTPHelper(email=client.email, password=client.pw, smtp_server=client.selected_server)
-            mail.send_mail(client.recipient, client.current_message)
+            mail = SMTPHelper(user=client.email, pw=client.pw, smtp_server=client.selected_server)
+            mail.send_mail(client.recipient, client.current_subject, client.current_message)
             dpg.set_value(note_input, '')
             client.current_message = ''
             dpg.set_value(note_input, client.current_message)
@@ -103,7 +110,22 @@ def main():
     
     def parse_inbox_cb(s, d):
         imap = IMAPHelper(client.email, client.pw)
-        imap.fetch_inbox()
+        client.email_list = imap.fetch_inbox()
+
+        #iterate through all emails in the email_list
+        dpg.show_item(emaillistwrapper_group)
+
+        for i in range(len(client.email_list)):
+            email = client.email_list.get_email(i)
+            dpg.set_value(f'e{i+1}_from_t', email.sender)
+            dpg.set_value(f'e{i+1}_date_t', email.date)
+            dpg.set_value(f'e{i+1}_subj_t', email.subject)
+            #dpg.set_value(f'e{i+1}_body_t', email.body)
+            
+
+
+
+
 
     dpg.create_context()
 
@@ -127,8 +149,6 @@ def main():
                     server_input = dpg.add_input_text(default_value='', callback=server_input_cb, width=235, multiline=False, show=False, hint='Enter server')
                     port_input = dpg.add_input_text(default_value='', callback=port_input_cb, width=60, multiline=False, show=False, hint='Port')
                 
-                #set the styling of the server_input_group
-
             
             with dpg.group(pos=[100, 100]) as common_ports_group:
                 dpg.add_text('Common SMTP ports:')
@@ -142,7 +162,7 @@ def main():
 
             line1 = LayoutHelper()
             line1. add_widget(dpg.add_spacer(), .05)
-            line1.add_widget(dpg.add_input_text(default_value='', tag='email_input', width=232, multiline=False), .90)
+            line1.add_widget(dpg.add_input_text(default_value='grabowski2001@gmail.com', tag='email_input', width=232, multiline=False), .90)
             line1.add_widget(dpg.add_spacer(), .05)
             line1.submit()
 
@@ -150,7 +170,7 @@ def main():
             dpg.add_text('Password:', indent=20)
             line2 = LayoutHelper()
             line2. add_widget(dpg.add_spacer(), .05)
-            line2.add_widget(dpg.add_input_text(default_value='', tag='pw_input', width=232, multiline=False, password=True), .90)
+            line2.add_widget(dpg.add_input_text(default_value='ikrkdqojefbxjwja', tag='pw_input', width=232, multiline=False, password=True), .90)
             line2.add_widget(dpg.add_spacer(), .05)
             line2.submit()
 
@@ -164,7 +184,7 @@ def main():
     with dpg.window(width=config['win_width'], height=config['win_height'], no_resize=True, no_move=True, no_title_bar=True, show=False) as email_screen:
         dpg.bind_font(f.b2_sb)
 
-        with dpg.group(tag='email_group') as email_group:   
+        with dpg.group() as email_group:   
             dpg.add_spacer(height=2)
             user_email_text = dpg.add_text('My Email: ')
             dpg.add_spacer(height=2)
@@ -172,17 +192,29 @@ def main():
             recip_email_input = dpg.add_input_text(default_value='', multiline=False, hint='Enter recipitent Email', callback = recip_email_cb, width=300)
 
             email_title_text = dpg.add_text('Enter your message:')
-            note_input = dpg.add_input_text(tag='note_inp', default_value='', callback=email_note_cb, multiline=True, height=-100, width=-1)
+            subj_inp = dpg.add_input_text(default_value='', width=-1, hint='Subject', callback=subj_inp_cb)
+            note_input = dpg.add_input_text(default_value='', callback=email_note_cb, multiline=True, height=-100, width=-1)
 
             with dpg.group(horizontal=True) as send_email_group:
                 dpg.add_button(label='Send Email', width = 160, height = 30, callback = send_message_cb)
                 dpg.add_button(label='Delete Email', width = 160, height = 30, callback = delete_message_cb)
 
-        with dpg.group(show=False, tag='read_group') as read_group:
+        with dpg.group(show=False) as inbox_group:
             dpg.add_text('Emails:')
+            dpg.add_spacer(height=42+36)
+            
+            with dpg.child_window(height = -100, width=-1, no_scrollbar=True) as email_1:
+                with dpg.group(show=False) as emaillistwrapper_group:
+                    for i in range(10):
+                        dpg.add_text('', tag=f'e{i+1}_from_t')
+                        dpg.add_text('', tag=f'e{i+1}_subj_t')
+                        dpg.add_text('', tag=f'e{i+1}_date_t')
+                        with dpg.drawlist(width=500, height=6):
+                            dpg.draw_line((0, 0), (500, 0), color=child_background_color, thickness=4)
+
             dpg.add_button(label='Fetch Inbox', width = 160, height = 30, callback=parse_inbox_cb)
 
-        tab = TabBarManager(num=2, list=['View Mail', 'Read Mail'], item_list=[email_group, read_group])
+        tab = TabBarManager(num=2, list=['Send Mail', 'Inbox'], item_list=[email_group, inbox_group])
 
 
     with dpg.theme() as email_list_group_theme:
@@ -200,28 +232,23 @@ def main():
         with dpg.theme_component(dpg.mvInputInt):
             dpg.add_theme_color(dpg.mvThemeCol_FrameBg, child_background_color, category=dpg.mvThemeCat_Core)
 
-    
     with dpg.theme() as login_group_theme:
         with dpg.theme_component(dpg.mvAll):
             dpg.add_theme_style(dpg.mvStyleVar_ItemSpacing, 0, 0)  
 
-    
     with dpg.theme() as send_page_theme:
         with dpg.theme_component(dpg.mvAll):
             dpg.add_theme_color(dpg.mvThemeCol_WindowBg, child_background_color, category=dpg.mvThemeCat_Core)
+            dpg.add_theme_color(dpg.mvThemeCol_ChildBg, frame_bg_color, category=dpg.mvThemeCat_Core)
 
 
     #show_demo()
-    dpg.show_style_editor()
+    #dpg.show_style_editor()
 
-    # Main/Default theme
     apply_main_theme()
-
-    # For custom theming on each page/element
     dpg.bind_item_theme(email_list_group, email_list_group_theme)
     dpg.bind_item_theme(login_group, login_group_theme)
     dpg.bind_item_theme(email_screen, send_page_theme)
-
 
     dpg.create_viewport(title=config['app_title'], width=config['win_width'] + 16, height=config['win_height'] + 38, min_height=600, min_width=340)
     dpg.setup_dearpygui()
