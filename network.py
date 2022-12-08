@@ -41,22 +41,10 @@ class IMAPHelper:
         self.mail = imaplib.IMAP4_SSL(self.imap_server)
         self.email_list = EmailList()
 
-    def fetch_inbox2(self):
-        with MailBox(self.imap_server).login(self.user, self.pw, 'INBOX') as mailbox:
-            # Calculate the date range for the last 24 hours
-            now = datetime.datetime.now()
-            date_lte = now.strftime('%d-%b-%Y')
-            date_gte = (now - datetime.timedelta(hours=24)).strftime('%d-%b-%Y')
-            for msg in mailbox.fetch(A(date_gte=date_gte, date_lte=date_lte)):
-                email = Email(sender=msg.from_, subject=msg.subject, body=msg.text or msg.html, date=msg.date_str)
-                self.email_list.add(email)
-        return self.email_list
-
-
     def fetch_inbox(self):
         with MailBox(self.imap_server).login(self.user, self.pw, 'INBOX') as mailbox:
             cur_date = date.today()  
-            for msg in mailbox.fetch(A(date_gte=datetime.date(cur_date.year, cur_date.month, cur_date.day))):
+            for msg in mailbox.fetch(A(date_gte=datetime.date(cur_date.year, cur_date.month, cur_date.day-1))):
                 email = Email(sender=msg.from_, subject=msg.subject, body=msg.text or msg.html, date=msg.date_str)
                 self.email_list.add(email)
         return self.email_list

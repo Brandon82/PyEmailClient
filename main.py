@@ -19,7 +19,6 @@ def main():
         win_width = dpg.get_item_width(login_screen)
         win_height = dpg.get_item_height(login_screen)
 
-        #check is login_screen is shown
         if (win_width < 634 and dpg.does_item_exist(login_screen)):
             dpg.hide_item(common_ports_group)
         else:
@@ -92,6 +91,8 @@ def main():
     
     def subj_inp_cb(s, d):
         client.current_subject = dpg.get_value(s)
+    
+
 
     def send_message_cb(s, d):
         if client.current_message != '''''':
@@ -100,6 +101,8 @@ def main():
             dpg.set_value(note_input, '')
             client.current_message = ''
             dpg.set_value(note_input, client.current_message)
+            client.current_subject = ''
+            dpg.set_value(note_input, client.current_subject)
 
     def delete_message_cb(s, d):
         client.current_message = ''
@@ -112,14 +115,13 @@ def main():
         imap = IMAPHelper(client.email, client.pw)
         client.email_list = imap.fetch_inbox()
 
-        #iterate through all emails in the email_list
         dpg.show_item(emaillistwrapper_group)
 
         for i in range(len(client.email_list)):
             email = client.email_list.get_email(i)
-            dpg.set_value(f'e{i+1}_from_t', email.sender)
-            dpg.set_value(f'e{i+1}_date_t', email.date)
-            dpg.set_value(f'e{i+1}_subj_t', email.subject)
+            dpg.set_value(f'e{i+1}_from_t', str(email.sender))
+            dpg.set_value(f'e{i+1}_date_t', str(email.date))
+            dpg.set_value(f'e{i+1}_subj_t', str(email.subject))
             #dpg.set_value(f'e{i+1}_body_t', email.body)
             
 
