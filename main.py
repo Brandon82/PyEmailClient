@@ -203,8 +203,11 @@ def main():
 
         with dpg.group(show=False) as inbox_group:
             dpg.add_text('Emails:')
-            dpg.add_spacer(height=42+36)
-            
+
+
+            dpg.add_spacer(height=42)
+            dpg.add_radio_button(items=['IMAP', 'POP'], default_value=0, horizontal=True)
+
             with dpg.child_window(height = -100, width=-1, no_scrollbar=True) as email_1:
                 with dpg.group(show=False) as emaillistwrapper_group:
                     for i in range(10):
